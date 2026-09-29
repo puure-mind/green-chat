@@ -3,6 +3,7 @@
 import { useAuthStore } from "@/features/auth/model/auth-store";
 import { ChatCreateForm } from "@/features/chat-create/ui/chat-create-form";
 import { useChatStore } from "@/features/chat-create/model/chat-store";
+import { MessagePoller } from "@/features/message-receive/ui/message-poller";
 import { ChatPanel } from "@/features/message-send/ui/chat-panel";
 
 export function ChatShell() {
@@ -16,6 +17,7 @@ export function ChatShell() {
 
   return (
     <main className="flex min-h-svh w-full bg-slate-950 p-3 text-white sm:p-6">
+      <MessagePoller credentials={credentials} />
       <section className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl shadow-slate-950/60">
         <aside className="hidden w-80 border-r border-white/10 bg-slate-950/80 p-4 md:block">
           <div className="flex items-center justify-between">
@@ -57,8 +59,13 @@ export function ChatShell() {
                 onClick={() => selectChat(chat.id)}
                 type="button"
               >
-                <span className="block text-sm font-semibold">
-                  {chat.title}
+                <span className="flex items-center justify-between gap-2 text-sm font-semibold">
+                  <span className="truncate">{chat.title}</span>
+                  {(chat.unreadCount ?? 0) > 0 ? (
+                    <span className="rounded-full bg-emerald-400 px-2 py-0.5 text-[0.68rem] font-bold text-slate-950">
+                      {chat.unreadCount ?? 0}
+                    </span>
+                  ) : null}
                 </span>
                 <span
                   className={`mt-1 block text-xs ${

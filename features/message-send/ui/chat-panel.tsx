@@ -24,6 +24,7 @@ function createLocalMessage(chatId: string, text: string): ChatMessage {
   return {
     chatId,
     createdAt,
+    direction: "outgoing",
     id: `local-${createdAt}-${crypto.randomUUID()}`,
     status: "pending",
     text,
@@ -52,13 +53,19 @@ function MessageBubble({
   message: ChatMessage;
   onRetry: (message: ChatMessage) => void;
 }) {
+  const isOutgoing = message.direction === "outgoing";
+
   return (
-    <div className="flex justify-end">
+    <div className={`flex ${isOutgoing ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[78%] rounded-[1.4rem] rounded-br-md px-4 py-2 shadow-lg ${
+        className={`max-w-[78%] rounded-[1.4rem] px-4 py-2 shadow-lg ${
+          isOutgoing ? "rounded-br-md" : "rounded-bl-md"
+        } ${
           message.status === "failed"
             ? "bg-red-500/15 text-red-50 shadow-red-950/20 ring-1 ring-red-400/25"
-            : "bg-emerald-400 text-slate-950 shadow-emerald-950/20"
+            : isOutgoing
+              ? "bg-emerald-400 text-slate-950 shadow-emerald-950/20"
+              : "bg-slate-800 text-white shadow-slate-950/20"
         }`}
       >
         <p className="whitespace-pre-wrap break-words text-sm leading-6">
@@ -66,19 +73,25 @@ function MessageBubble({
         </p>
         <div
           className={`mt-1 flex items-center justify-end gap-2 text-[0.68rem] ${
-            message.status === "failed" ? "text-red-100" : "text-slate-700"
+            message.status === "failed"
+              ? "text-red-100"
+              : isOutgoing
+                ? "text-slate-700"
+                : "text-slate-400"
           }`}
         >
           <span>{formatMessageTime(message.createdAt)}</span>
-          <span>
-            {message.status === "pending"
-              ? "отправка"
-              : message.status === "sent"
-                ? "✓✓"
-                : "ошибка"}
-          </span>
+          {isOutgoing ? (
+            <span>
+              {message.status === "pending"
+                ? "отправка"
+                : message.status === "sent"
+                  ? "✓✓"
+                  : "ошибка"}
+            </span>
+          ) : null}
         </div>
-        {message.status === "failed" ? (
+        {message.status === "failed" && isOutgoing ? (
           <button
             className="mt-2 rounded-full bg-red-400/20 px-3 py-1 text-xs font-semibold text-red-50 transition hover:bg-red-400/30"
             onClick={() => onRetry(message)}
