@@ -1,13 +1,23 @@
 "use client";
 
 import { useAuthStore } from "@/features/auth/model/auth-store";
+import { ChatCreateForm } from "@/features/chat-create/ui/chat-create-form";
+import { useChatStore } from "@/features/chat-create/model/chat-store";
+import { MessagePoller } from "@/features/message-receive/ui/message-poller";
+import { ChatPanel } from "@/features/message-send/ui/chat-panel";
 
 export function ChatShell() {
   const credentials = useAuthStore((state) => state.credentials);
   const logout = useAuthStore((state) => state.logout);
+  const chats = useChatStore((state) => state.chats);
+  const createChat = useChatStore((state) => state.createChat);
+  const selectedChatId = useChatStore((state) => state.selectedChatId);
+  const selectChat = useChatStore((state) => state.selectChat);
+  const selectedChat = chats.find((chat) => chat.id === selectedChatId);
 
   return (
     <main className="flex min-h-svh w-full bg-slate-950 p-3 text-white sm:p-6">
+      <MessagePoller credentials={credentials} />
       <section className="mx-auto flex w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl shadow-slate-950/60">
         <aside className="hidden w-80 border-r border-white/10 bg-slate-950/80 p-4 md:block">
           <div className="flex items-center justify-between">
@@ -31,15 +41,61 @@ export function ChatShell() {
               {credentials?.idInstance}
             </p>
           </div>
+          <ChatCreateForm credentials={credentials} onCreateChat={createChat} />
+          <div className="mt-5 space-y-2">
+            {chats.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-white/10 px-4 py-5 text-center text-sm text-slate-500">
+                Создайте чат по номеру телефона
+              </p>
+            ) : null}
+            {chats.map((chat) => (
+              <button
+                className={`w-full rounded-2xl px-4 py-3 text-left transition ${
+                  chat.id === selectedChatId
+                    ? "bg-emerald-300 text-slate-950"
+                    : "bg-white/5 text-white hover:bg-white/10"
+                }`}
+                key={chat.id}
+                onClick={() => selectChat(chat.id)}
+                type="button"
+              >
+                <span className="flex items-center justify-between gap-2 text-sm font-semibold">
+                  <span className="truncate">{chat.title}</span>
+                  {(chat.unreadCount ?? 0) > 0 ? (
+                    <span className="rounded-full bg-emerald-400 px-2 py-0.5 text-[0.68rem] font-bold text-slate-950">
+                      {chat.unreadCount ?? 0}
+                    </span>
+                  ) : null}
+                </span>
+                <span
+                  className={`mt-1 block text-xs ${
+                    chat.id === selectedChatId
+                      ? "text-slate-700"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {chat.lastMessageAt === null
+                    ? "Чат создан"
+                    : "Есть сообщения"}
+                </span>
+              </button>
+            ))}
+          </div>
         </aside>
 
         <div className="flex min-h-[calc(100svh-1.5rem)] flex-1 flex-col sm:min-h-[calc(100svh-3rem)]">
           <header className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div>
               <p className="text-sm text-slate-400">
-                Основная часть приложения
+                {selectedChat === undefined
+                  ? "Основная часть приложения"
+                  : "Чат"}
               </p>
-              <h1 className="text-lg font-semibold">Добро пожаловать</h1>
+              <h1 className="text-lg font-semibold">
+                {selectedChat === undefined
+                  ? "Добро пожаловать"
+                  : `+${selectedChat.phone}`}
+              </h1>
             </div>
             <button
               className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15 md:hidden"
@@ -50,20 +106,7 @@ export function ChatShell() {
             </button>
           </header>
 
-          <div className="flex flex-1 items-center justify-center p-6">
-            <div className="max-w-md text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-400/15 text-2xl text-emerald-200">
-                GC
-              </div>
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Авторизация выполнена
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-400">
-                Данные сохранены локально. Следующим use-case можно подключать
-                список чатов и отправку сообщений через Green API.
-              </p>
-            </div>
-          </div>
+          <ChatPanel chat={selectedChat} credentials={credentials} />
         </div>
       </section>
     </main>
