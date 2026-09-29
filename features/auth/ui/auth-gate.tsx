@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { checkAuthCredentials } from "../api/check-auth";
+import { isInvalidCredentialsError } from "../model/auth-errors";
 import { useAuthStore } from "../model/auth-store";
 import { AuthForm } from "./auth-form";
 import { ChatShell } from "@/widgets/chat-shell/ui/chat-shell";
@@ -53,12 +54,42 @@ function AuthScreen() {
   );
 }
 
+function AuthVerificationFailed({ onRetry }: { onRetry: () => void }) {
+  return (
+    <main className="flex min-h-svh items-center justify-center bg-[#e7f8ee] px-4">
+      <div className="max-w-md rounded-[2rem] border border-amber-100 bg-white/95 px-8 py-7 text-center shadow-2xl shadow-emerald-950/10">
+        <p className="text-sm font-medium uppercase tracking-[0.24em] text-amber-600">
+          Green Chat
+        </p>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+          Не удалось проверить авторизацию
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-500">
+          Мы сохранили данные входа. Проверьте подключение или доступность Green
+          API и повторите проверку.
+        </p>
+        <button
+          className="mt-6 h-12 rounded-2xl bg-emerald-500 px-6 text-base font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-600"
+          onClick={onRetry}
+          type="button"
+        >
+          Повторить
+        </button>
+      </div>
+    </main>
+  );
+}
+
 export function AuthGate() {
   const credentials = useAuthStore((state) => state.credentials);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const status = useAuthStore((state) => state.status);
   const logout = useAuthStore((state) => state.logout);
+  const retryVerification = useAuthStore((state) => state.retryVerification);
   const setStatus = useAuthStore((state) => state.setStatus);
+  const verificationAttempt = useAuthStore(
+    (state) => state.verificationAttempt,
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -85,9 +116,14 @@ export function AuthGate() {
         if (isActive) {
           setStatus("authenticated");
         }
-      } catch {
+      } catch (error) {
         if (isActive) {
-          logout();
+          if (isInvalidCredentialsError(error)) {
+            logout();
+            return;
+          }
+
+          setStatus("verification-failed");
         }
       }
     }
@@ -97,7 +133,14 @@ export function AuthGate() {
     return () => {
       isActive = false;
     };
-  }, [credentials, hasHydrated, logout, setStatus, status]);
+  }, [
+    credentials,
+    hasHydrated,
+    logout,
+    setStatus,
+    status,
+    verificationAttempt,
+  ]);
 
   if (status === "initializing") {
     return <AuthLoading />;
@@ -105,6 +148,10 @@ export function AuthGate() {
 
   if (status === "authenticated") {
     return <ChatShell />;
+  }
+
+  if (status === "verification-failed") {
+    return <AuthVerificationFailed onRetry={retryVerification} />;
   }
 
   return <AuthScreen />;

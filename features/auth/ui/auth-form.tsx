@@ -1,30 +1,11 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { checkAuthCredentials } from "../api/check-auth";
+import { getAuthErrorMessage } from "../model/auth-errors";
 import { useAuthStore } from "../model/auth-store";
 import type { AuthCredentials } from "@/shared/types/auth";
-
-const unknownUserMessage =
-  "Пользователь с такими idInstance и apiTokenInstance не найден.";
-
-function getAuthErrorMessage(error: unknown) {
-  if (error instanceof AxiosError && error.response?.status === 401) {
-    return unknownUserMessage;
-  }
-
-  if (error instanceof AxiosError && error.response?.status === 403) {
-    return unknownUserMessage;
-  }
-
-  if (error instanceof AxiosError && error.response?.status === 404) {
-    return unknownUserMessage;
-  }
-
-  return "Не удалось проверить данные. Проверьте idInstance, apiTokenInstance и повторите попытку.";
-}
 
 export function AuthForm() {
   const saveCredentials = useAuthStore((state) => state.setCredentials);
