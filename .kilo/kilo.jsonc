@@ -1,0 +1,12 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "pnpm check": "allow",
+      "pnpm format": "allow",
+      "pnpm lint": "allow",
+      "pnpm typecheck": "allow"
+    }
+  }
+}
