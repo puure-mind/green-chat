@@ -2,30 +2,44 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AuthCredentials, AuthSession } from "@/shared/types/auth";
+import type { AuthCredentials } from "@/shared/types/auth";
+
+export type AuthStatus = "initializing" | "authenticated" | "unauthenticated";
 
 type AuthState = {
-  session: AuthSession | null;
-  setSession: (credentials: AuthCredentials) => void;
-  clearSession: () => void;
+  credentials: AuthCredentials | null;
+  hasHydrated: boolean;
+  status: AuthStatus;
+  setCredentials: (credentials: AuthCredentials) => void;
+  setHasHydrated: (hasHydrated: boolean) => void;
+  setStatus: (status: AuthStatus) => void;
+  logout: () => void;
 };
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      session: null,
-      setSession: (credentials) =>
+      credentials: null,
+      hasHydrated: false,
+      status: "initializing",
+      setCredentials: (credentials) =>
         set({
-          session: {
+          credentials: {
             idInstance: credentials.idInstance.trim(),
             apiTokenInstance: credentials.apiTokenInstance.trim(),
-            authorizedAt: new Date().toISOString(),
           },
+          status: "authenticated",
         }),
-      clearSession: () => set({ session: null }),
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
+      setStatus: (status) => set({ status }),
+      logout: () => set({ credentials: null, status: "unauthenticated" }),
     }),
     {
       name: "green-chat-auth",
+      partialize: (state) => ({ credentials: state.credentials }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );

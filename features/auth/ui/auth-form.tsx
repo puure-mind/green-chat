@@ -27,7 +27,7 @@ function getAuthErrorMessage(error: unknown) {
 }
 
 export function AuthForm() {
-  const setSession = useAuthStore((state) => state.setSession);
+  const saveCredentials = useAuthStore((state) => state.setCredentials);
   const [credentials, setCredentials] = useState<AuthCredentials>({
     idInstance: "",
     apiTokenInstance: "",
@@ -36,9 +36,9 @@ export function AuthForm() {
 
   const authMutation = useMutation({
     mutationFn: checkAuthCredentials,
-    onSuccess: () => {
+    onSuccess: (_settings, submittedCredentials) => {
       setErrorMessage("");
-      setSession(credentials);
+      saveCredentials(submittedCredentials);
     },
     onError: (error) => {
       setErrorMessage(getAuthErrorMessage(error));
@@ -55,7 +55,10 @@ export function AuthForm() {
       className="w-full max-w-md rounded-[2rem] border border-emerald-100 bg-white/95 p-6 shadow-2xl shadow-emerald-950/10 backdrop-blur sm:p-8"
       onSubmit={(event) => {
         event.preventDefault();
-        authMutation.mutate(credentials);
+        authMutation.mutate({
+          idInstance: credentials.idInstance,
+          apiTokenInstance: credentials.apiTokenInstance,
+        });
       }}
     >
       <div className="mb-8">

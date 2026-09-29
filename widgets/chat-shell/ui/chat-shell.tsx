@@ -3,8 +3,8 @@
 import { useAuthStore } from "@/features/auth/model/auth-store";
 
 export function ChatShell() {
-  const session = useAuthStore((state) => state.session);
-  const clearSession = useAuthStore((state) => state.clearSession);
+  const credentials = useAuthStore((state) => state.credentials);
+  const logout = useAuthStore((state) => state.logout);
 
   return (
     <main className="flex min-h-svh w-full bg-slate-950 p-3 text-white sm:p-6">
@@ -19,7 +19,7 @@ export function ChatShell() {
             </div>
             <button
               className="rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300 transition hover:border-emerald-300 hover:text-emerald-200"
-              onClick={clearSession}
+              onClick={logout}
               type="button"
             >
               Выйти
@@ -28,7 +28,7 @@ export function ChatShell() {
           <div className="mt-6 rounded-2xl bg-white/5 p-4">
             <p className="text-sm text-slate-300">Аккаунт подключен</p>
             <p className="mt-1 truncate text-sm font-medium text-white">
-              {session?.idInstance}
+              {credentials?.idInstance}
             </p>
           </div>
         </aside>
@@ -43,7 +43,7 @@ export function ChatShell() {
             </div>
             <button
               className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15 md:hidden"
-              onClick={clearSession}
+              onClick={logout}
               type="button"
             >
               Выйти
