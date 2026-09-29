@@ -1,18 +1,63 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { checkAccount } from "../api/check-account";
 import {
+  getPhoneFromChatId,
   normalizePhoneInput,
   validatePhoneNumber,
 } from "@/features/user-search/model/phone";
+import type { AuthCredentials } from "@/shared/types/auth";
 
 type ChatCreateFormProps = {
-  onCreateChat: (phone: string) => void;
+  credentials: AuthCredentials | null;
+  onCreateChat: (params: {
+    chatId: string;
+    phone: string;
+    title: string;
+  }) => void;
 };
 
-export function ChatCreateForm({ onCreateChat }: ChatCreateFormProps) {
+export function ChatCreateForm({
+  credentials,
+  onCreateChat,
+}: ChatCreateFormProps) {
   const [phone, setPhone] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const checkAccountMutation = useMutation({
+    mutationFn: async (submittedPhone: string) => {
+      if (credentials === null) {
+        throw new Error("Авторизация не найдена.");
+      }
+
+      return checkAccount({
+        chatId: `${submittedPhone}@c.us`,
+        credentials,
+      });
+    },
+    onError: () => {
+      setErrorMessage("Не удалось проверить пользователя. Попробуйте еще раз.");
+    },
+    onSuccess: (result, submittedPhone) => {
+      if (!result.existsWhatsapp) {
+        setErrorMessage("Пользователь с таким номером не найден.");
+        return;
+      }
+
+      const phoneFromResponse = getPhoneFromChatId(result.phoneNumber);
+
+      setErrorMessage("");
+      onCreateChat({
+        chatId: result.chatId,
+        phone:
+          phoneFromResponse.length > 0 ? phoneFromResponse : submittedPhone,
+        title: result.username || phoneFromResponse || submittedPhone,
+      });
+      setPhone("");
+    },
+  });
 
   return (
     <section className="mt-6">
@@ -29,8 +74,7 @@ export function ChatCreateForm({ onCreateChat }: ChatCreateFormProps) {
           }
 
           setErrorMessage("");
-          onCreateChat(normalizePhoneInput(phone));
-          setPhone("");
+          checkAccountMutation.mutate(normalizePhoneInput(phone));
         }}
       >
         <label className="text-xs font-medium text-slate-400" htmlFor="phone">
@@ -46,13 +90,15 @@ export function ChatCreateForm({ onCreateChat }: ChatCreateFormProps) {
             onChange={(event) => {
               setPhone(event.target.value);
               setErrorMessage("");
+              checkAccountMutation.reset();
             }}
           />
           <button
-            className="rounded-2xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+            className="rounded-2xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+            disabled={checkAccountMutation.isPending}
             type="submit"
           >
-            Создать
+            {checkAccountMutation.isPending ? "..." : "Создать"}
           </button>
         </div>
       </form>

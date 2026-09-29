@@ -3,6 +3,7 @@
 import { useAuthStore } from "@/features/auth/model/auth-store";
 import { ChatCreateForm } from "@/features/chat-create/ui/chat-create-form";
 import { useChatStore } from "@/features/chat-create/model/chat-store";
+import { ChatPanel } from "@/features/message-send/ui/chat-panel";
 
 export function ChatShell() {
   const credentials = useAuthStore((state) => state.credentials);
@@ -38,7 +39,7 @@ export function ChatShell() {
               {credentials?.idInstance}
             </p>
           </div>
-          <ChatCreateForm onCreateChat={createChat} />
+          <ChatCreateForm credentials={credentials} onCreateChat={createChat} />
           <div className="mt-5 space-y-2">
             {chats.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-white/10 px-4 py-5 text-center text-sm text-slate-500">
@@ -57,7 +58,7 @@ export function ChatShell() {
                 type="button"
               >
                 <span className="block text-sm font-semibold">
-                  +{chat.phone}
+                  {chat.title}
                 </span>
                 <span
                   className={`mt-1 block text-xs ${
@@ -66,7 +67,9 @@ export function ChatShell() {
                       : "text-slate-500"
                   }`}
                 >
-                  Чат создан
+                  {chat.lastMessageAt === null
+                    ? "Чат создан"
+                    : "Есть сообщения"}
                 </span>
               </button>
             ))}
@@ -96,23 +99,7 @@ export function ChatShell() {
             </button>
           </header>
 
-          <div className="flex flex-1 items-center justify-center p-6">
-            <div className="max-w-md text-center">
-              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-400/15 text-2xl text-emerald-200">
-                GC
-              </div>
-              <h2 className="text-2xl font-semibold tracking-tight">
-                {selectedChat === undefined
-                  ? "Авторизация выполнена"
-                  : "Чат готов"}
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-400">
-                {selectedChat === undefined
-                  ? "Введите номер в сайдбаре, чтобы создать чат без проверки регистрации пользователя."
-                  : "Следующим use-case можно подключать поле ввода и отправку сообщений."}
-              </p>
-            </div>
-          </div>
+          <ChatPanel chat={selectedChat} credentials={credentials} />
         </div>
       </section>
     </main>
