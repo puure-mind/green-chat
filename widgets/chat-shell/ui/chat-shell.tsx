@@ -1,10 +1,17 @@
 "use client";
 
 import { useAuthStore } from "@/features/auth/model/auth-store";
+import { ChatCreateForm } from "@/features/chat-create/ui/chat-create-form";
+import { useChatStore } from "@/features/chat-create/model/chat-store";
 
 export function ChatShell() {
   const credentials = useAuthStore((state) => state.credentials);
   const logout = useAuthStore((state) => state.logout);
+  const chats = useChatStore((state) => state.chats);
+  const createChat = useChatStore((state) => state.createChat);
+  const selectedChatId = useChatStore((state) => state.selectedChatId);
+  const selectChat = useChatStore((state) => state.selectChat);
+  const selectedChat = chats.find((chat) => chat.id === selectedChatId);
 
   return (
     <main className="flex min-h-svh w-full bg-slate-950 p-3 text-white sm:p-6">
@@ -31,15 +38,54 @@ export function ChatShell() {
               {credentials?.idInstance}
             </p>
           </div>
+          <ChatCreateForm onCreateChat={createChat} />
+          <div className="mt-5 space-y-2">
+            {chats.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-white/10 px-4 py-5 text-center text-sm text-slate-500">
+                Создайте чат по номеру телефона
+              </p>
+            ) : null}
+            {chats.map((chat) => (
+              <button
+                className={`w-full rounded-2xl px-4 py-3 text-left transition ${
+                  chat.id === selectedChatId
+                    ? "bg-emerald-300 text-slate-950"
+                    : "bg-white/5 text-white hover:bg-white/10"
+                }`}
+                key={chat.id}
+                onClick={() => selectChat(chat.id)}
+                type="button"
+              >
+                <span className="block text-sm font-semibold">
+                  +{chat.phone}
+                </span>
+                <span
+                  className={`mt-1 block text-xs ${
+                    chat.id === selectedChatId
+                      ? "text-slate-700"
+                      : "text-slate-500"
+                  }`}
+                >
+                  Чат создан
+                </span>
+              </button>
+            ))}
+          </div>
         </aside>
 
         <div className="flex min-h-[calc(100svh-1.5rem)] flex-1 flex-col sm:min-h-[calc(100svh-3rem)]">
           <header className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div>
               <p className="text-sm text-slate-400">
-                Основная часть приложения
+                {selectedChat === undefined
+                  ? "Основная часть приложения"
+                  : "Чат"}
               </p>
-              <h1 className="text-lg font-semibold">Добро пожаловать</h1>
+              <h1 className="text-lg font-semibold">
+                {selectedChat === undefined
+                  ? "Добро пожаловать"
+                  : `+${selectedChat.phone}`}
+              </h1>
             </div>
             <button
               className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15 md:hidden"
@@ -56,11 +102,14 @@ export function ChatShell() {
                 GC
               </div>
               <h2 className="text-2xl font-semibold tracking-tight">
-                Авторизация выполнена
+                {selectedChat === undefined
+                  ? "Авторизация выполнена"
+                  : "Чат готов"}
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-400">
-                Данные сохранены локально. Следующим use-case можно подключать
-                список чатов и отправку сообщений через Green API.
+                {selectedChat === undefined
+                  ? "Введите номер в сайдбаре, чтобы создать чат без проверки регистрации пользователя."
+                  : "Следующим use-case можно подключать поле ввода и отправку сообщений."}
               </p>
             </div>
           </div>
