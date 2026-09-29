@@ -3,16 +3,16 @@
   "permission": {
     "bash": {
       "*": "ask",
-      "pnpm check": "allow",
-      "pnpm format": "allow",
-      "pnpm lint": "allow",
-      "pnpm typecheck": "allow",
-      "git status": "allow",
-      "git diff": "allow",
-      "git log": "allow",
-      "git add": "allow",
-      "git commit": "allow",
-      "git push": "allow"
+      "pnpm check *": "allow",
+      "pnpm format *": "allow",
+      "pnpm lint *": "allow",
+      "pnpm typecheck *": "allow",
+      "git status *": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "git add *": "allow",
+      "git commit *": "allow",
+      "git push *": "allow"
     }
   }
 }
