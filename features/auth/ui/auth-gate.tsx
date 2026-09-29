@@ -68,6 +68,10 @@ export function AuthGate() {
         return;
       }
 
+      if (status === "authenticated") {
+        return;
+      }
+
       setStatus("initializing");
 
       if (credentials === null) {
@@ -93,7 +97,7 @@ export function AuthGate() {
     return () => {
       isActive = false;
     };
-  }, [credentials, hasHydrated, logout, setStatus]);
+  }, [credentials, hasHydrated, logout, setStatus, status]);
 
   if (status === "initializing") {
     return <AuthLoading />;
