@@ -56,7 +56,7 @@ export function MessagePoller({ credentials }: MessagePollerProps) {
       }
     }
 
-    poll();
+    void poll();
 
     const intervalId = window.setInterval(poll, POLLING_INTERVAL_MS);
 
