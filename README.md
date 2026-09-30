@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Green Chat
 
-## Getting Started
+Green Chat is a minimal messenger-style Next.js application for working with chats through Green API.
 
-First, run the development server:
+## Requirements
+
+- Node.js 20 or newer.
+- pnpm 9.7.0 or newer.
+- Active Green API instance with `idInstance` and `apiTokenInstance`.
+
+## Local Setup
+
+Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create a local environment file from the example:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set the Green API base URL in `.env.local`:
 
-## Learn More
+```bash
+NEXT_PUBLIC_GREEN_API_URL=<apiUrlFromGreenApiConsole>
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Start the development server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+Open `http://localhost:3000` in a browser.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app uses credentials entered in the authorization form:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `idInstance` from the Green API console.
+- `apiTokenInstance` from the Green API console.
+
+After successful authorization, enter a phone number in international format, create or open a chat, send messages, and
+keep the page open to receive incoming messages.
+
+## Quality Checks
+
+Run all project checks:
+
+```bash
+pnpm check
+```
+
+Run checks separately:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+```
+
+Format files:
+
+```bash
+pnpm format
+```
+
+## Production Build
+
+Create a production build:
+
+```bash
+pnpm build
+```
+
+Run the production server locally:
+
+```bash
+pnpm start
+```
+
+The production server also uses variables from `.env.local` or the deployment environment.
