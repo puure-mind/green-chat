@@ -1,0 +1,27 @@
+name: OpenRouter AI PR Reviewer
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Run OpenRouter Code Review
+        uses: cirolini/genai-code-review@v1
+        with:
+          # Меняем эндпоинт на OpenRouter
+          base_url: "https://openrouter.ai/api/v1"
+          # Выбираем ЛЮБУЮ модель из каталога OpenRouter
+          model: "anthropic/claude-3.5-sonnet" # Или "deepseek/deepseek-r1", или "meta-llama/llama-3.3-70b-instruct:free"
+          # Передаем токен
+          api_key: ${{ secrets.ROUTERAI_KEY }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
